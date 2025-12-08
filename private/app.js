@@ -24,6 +24,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.get('/', async (req, res) => {
   res.send('Welcome to the backend');
+  // const result = await query("SELECT * FROM balance_records");
+  // console.log(result.rows);
 });
 app.use(express.static(path.join(__dirname, '..', 'public')));
 

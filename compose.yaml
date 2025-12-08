@@ -31,7 +31,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql
-      - ./tsapp2.sql:/docker-entrypoint-initdb.d/tsapp2.sql
+      - ./tsapp.sql:/docker-entrypoint-initdb.d/tsapp.sql
     environment:
       POSTGRES_DB: tsapp
       POSTGRES_USER: pg
