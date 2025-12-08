@@ -23,9 +23,11 @@ app.use(cookieParser(process.env.SECRET));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.get('/', async (req, res) => {
-  res.send('Welcome to the backend');
-  // const result = await query("SELECT * FROM balance_records");
-  // console.log(result.rows);
+  // res.send('Welcome to the backend');
+  // await query("CREATE TABLE sess(id SERIAL, text TEXT)")
+  // await query("INSERT INTO sess(text) VALUES('123')");
+  const result = await query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+  console.log(result.rows);
 });
 app.use(express.static(path.join(__dirname, '..', 'public')));
 

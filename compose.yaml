@@ -34,7 +34,7 @@ services:
       - ./tsapp.sql:/docker-entrypoint-initdb.d/tsapp.sql
     environment:
       POSTGRES_DB: tsapp
-      POSTGRES_USER: pg
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1979
     expose:
       - 5432
