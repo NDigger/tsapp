@@ -32,10 +32,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql
       - ./tsapp.sql:/docker-entrypoint-initdb.d/tsapp.sql
+    env_file: ./private/.env
     environment:
-      POSTGRES_DB: tsapp
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1979
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     expose:
       - 5432
     healthcheck:
