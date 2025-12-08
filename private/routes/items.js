@@ -6,7 +6,7 @@ const { addItem, getItems, getItem } = require('../models/items');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '..', '..', 'item-images'));
+    cb(null, path.join(__dirname, '..', 'item-images'));
   },
   filename: async function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
