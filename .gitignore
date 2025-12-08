@@ -1,2 +1,4 @@
 private/.env
-node_modules
+private/node_modules
+public/node_modules
+.env

@@ -5,6 +5,7 @@ require('dotenv').config();
 const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const { query } = require('./dbmodel');
 
 // 200 — всё прошло успешно.
 // 400 — ошибка со стороны клиента (неверный запрос, нет нужных данных и т.п.).
@@ -21,7 +22,7 @@ app.use(cors({
 app.use(cookieParser(process.env.SECRET));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
   res.send('Welcome to the backend');
 });
 app.use(express.static(path.join(__dirname, '..', 'public')));

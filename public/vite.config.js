@@ -1,8 +1,8 @@
 export default {
-  root: 'public',
+  root: '.',
   build: {
     rollupOptions: {
-      input: 'public/index.html',
+      input: 'index.html',
     },
   },
 }
