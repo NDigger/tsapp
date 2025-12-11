@@ -2,7 +2,7 @@ ARG NODE_VERSION=22.14.0
 
 FROM node:${NODE_VERSION}
 
-WORKDIR /app
+WORKDIR /app/frontend
 
 COPY package.json .
 

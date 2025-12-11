@@ -10,7 +10,9 @@
 
 services:
   backend:
-    build: ./private
+    image: t-shirtsapp-backend
+    volumes:
+      - ./private:/app/backend
     env_file: ./private/.env
     environment:
       NODE_ENV: production
@@ -20,7 +22,9 @@ services:
       db:
         condition: service_healthy
   frontend:
-    build: ./public
+    image: t-shirtsapp-frontend
+    volumes:
+      - ./public:/app/frontend
     ports:
       - 5173:5173
     depends_on:
@@ -35,12 +39,12 @@ services:
     env_file: private/.env
     # environment:
     #   POSTGRES_DB: ${DB_NAME}
-    #   POSTGRES_USER: ${POSTGRES_USER}
+    #   POSTGRES_USER: 'postgres'
     #   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     expose:
       - 5432
     healthcheck:
-      test: [ "CMD", "pg_isready" ]
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
