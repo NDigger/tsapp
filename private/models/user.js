@@ -9,11 +9,6 @@ const crypto = require('crypto');
 // }
 
 class User {
-    id
-    firstName
-    lastName
-    role
-
     // Creates and returns a new user object
     static async create({ firstName, lastName, email, password }) {
         const res = await query(
@@ -52,16 +47,19 @@ class User {
             firstName: user.first_name,
             lastName: user.last_name,
             role: user.role,
+            email: user.email
         }
     }
 
     static async fromToken(token) {
         const userData = await User.getByToken(token);
+        if (userData === undefined) return undefined;
         return new User(User.dbToJsObj(userData));
     }
 
     static async fromId(userId) {
         const userData = await User.getById(userId);
+        if (userData === undefined) return undefined;
         return new User(User.dbToJsObj(userData));
     }
 

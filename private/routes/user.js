@@ -5,15 +5,14 @@ const User = require('../models/user');
 
 router.get('/', async (req, res) => {
   try {
-    const user = await User.getByToken(req.cookies.token)
+    const user = await User.fromToken(req.cookies.token)
     if (user == undefined) res.sendStatus(401)
-    const { id, first_name, last_name, email, role } = user;
     res.json({
-      firstName: first_name,
-      lastName: last_name,
-      email: email,
-      role: role,
-      id: id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      id: user.id,
     });
   } catch(e) {
     console.error(e)
@@ -29,8 +28,8 @@ router.get('/by-login', async (req, res) => {
       await user.createSession(res);
       res.sendStatus(200);
     }
-  } catch(err) {
-    console.error(err)
+  } catch(e) {
+    console.error(e)
     res.sendStatus(500)
   }
 })
