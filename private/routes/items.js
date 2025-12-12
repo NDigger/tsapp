@@ -23,7 +23,14 @@ const uploadItemImage = multer({ storage })
 router.post('/', uploadItemImage.single('image'), async (req, res) => {
   try {
     const seller = await Seller.fromToken(req.cookies.token);
-    await seller.postItem(req.body);
+    const {name, material, price, fullFileName} = req.body;
+    await seller.postItem({
+      name: name,
+      material: material,
+      price: price,
+      fullFileName: fullFileName,
+      sizes: JSON.stringify(req.body.sizes)
+    });
     res.sendStatus(200);
   } catch(e) {
     console.error(e)
