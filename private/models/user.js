@@ -33,7 +33,7 @@ class User {
     static async setLocation(req, {street, place, psc}) {
         const user = await User.getByToken(req.cookies.token);
         const location = await query(
-            'INSERT INTO locations(user_id, street, place, psc) VALUES($1, $2, $3, $4) ON CONFLICT(user_id) DO UPDATE SET street=EXCLUDED.street, place=EXCLUDED.place, psc=EXCLUDED.psc RETURNING *',
+            'INSERT INTO locations(user_id, street, place, psc) VALUES($1, $2, $3, $4) ON CONFLICT(user_id) DO UPDATE SET street=EXCLUDED.street, place=EXCLUDED.place, psc=EXCLUDED.psc RETURNING street, place, psc',
             [user.id, street, place, psc]
         );
         return location.rows[0];
@@ -41,7 +41,7 @@ class User {
 
     static async getLocation(req) {
         const user = await User.getByToken(req.cookies.token);
-        const location = await query('SELECT * FROM locations WHERE user_id=$1', [user.id]);
+        const location = await query('SELECT street, place, psc FROM locations WHERE user_id=$1', [user.id]);
         return location.rows[0];
     }
 
