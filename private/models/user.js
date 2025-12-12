@@ -1,13 +1,6 @@
 const { query } = require('../dbmodel');
 const crypto = require('crypto');
 
-// Definition of user roles. 
-// UserRole = {
-//     PURCHASER: 0,
-//     SELLER: 1,
-//     MODERATOR: 2,
-// }
-
 class User {
     // Creates and returns a new user object
     static async create({ firstName, lastName, email, password }) {

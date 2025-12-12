@@ -1,7 +1,13 @@
 const express = require('express');
 const router = express.Router();
-
 const User = require('../models/user');
+
+// Definition of user roles. 
+UserRole = {
+    PURCHASER: 0,
+    SELLER: 1,
+    MODERATOR: 2,
+}
 
 router.get('/', async (req, res) => {
   try {
@@ -80,9 +86,10 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async(req, res) => {
   try {
-    const currentUser = await User.getByToken(req.cookies.token);
-    if (currentUser.role !== UserRole.MODERATOR) return res.sendStatus(401);
-    await deleteUserById(req.params.id)
+    const expectedModerator = await User.fromToken(req.cookies.token);
+    if (expectedModerator.role !== UserRole.MODERATOR) return res.sendStatus(401);
+    const user = User.fromId(req.params.id); // User for deletion
+    await user.delete();
     res.sendStatus(200)
   } catch(e) {
     console.error(e)
