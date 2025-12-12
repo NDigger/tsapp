@@ -19,22 +19,6 @@ const prepareItem = (item, itemSizes) => {
     return item;
 }
 
-class Item {
-    static async getSizes(itemId) {
-        const items = await query('SELECT * FROM item_sizes WHERE item_id=$1', [itemId]);
-        return items.rows;
-    }
-
-    static async get(itemId) {
-        let item = await query('SELECT * FROM items WHERE id=$1', [itemId]);
-        item = item.rows[0];
-        const itemSizes = await Item.getSizes(itemId);
-        item.sizes = itemSizes;
-        item.imageBase64 = getBase64Image(item.image_path);
-        return item;
-    }
-}
-
 class Seller extends User {
     async getItems() {
         let items = await query('SELECT * FROM items WHERE seller_id=$1', [this.id]);

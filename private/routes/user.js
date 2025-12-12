@@ -2,13 +2,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 
-// Definition of user roles. 
-UserRole = {
-    PURCHASER: 0,
-    SELLER: 1,
-    MODERATOR: 2,
-}
-
 router.post('/', async (req, res) => {
   try {
     const user = await User.create(req.body);
@@ -66,7 +59,7 @@ router.put('/password', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const currentUser = await User.getByToken(req.cookies.token);
-    if (currentUser.role !== UserRole.MODERATOR) return res.sendStatus(401);
+    if (currentUser.role !== User.Role.MODERATOR) return res.sendStatus(401);
     const findUser = await User.getById(req.params.id);
     if (findUser.id === currentUser.id) res.sendStatus(401);
     const { id, first_name, last_name, email, role } = findUser;

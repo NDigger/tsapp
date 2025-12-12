@@ -4,6 +4,13 @@ const crypto = require('crypto');
 const { getBase64Image } = require('../models/images');
 
 class User {
+    // Definition of user roles. 
+    static Role = {
+        PURCHASER: 0,
+        SELLER: 1,
+        MODERATOR: 2,
+    }
+    
     // Creates and returns a new user object
     static async create({ firstName, lastName, email, password }) {
         const res = await query(
