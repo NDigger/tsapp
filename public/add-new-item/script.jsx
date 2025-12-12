@@ -40,8 +40,8 @@ const App = () => {
         formData.append('sizeCountXL', sizeCountValue.XL);
         formData.append('sizeCountXXL', sizeCountValue.XXL);
         formData.append('sizeCountXXXL', sizeCountValue.XXXL);
-        if ((image.files[0].size / 1024 / 1024).toFixed(2) > 1) {
-            setErrorText('Max file size is 1MB')
+        if ((image.files[0].size / 1024 / 1024).toFixed(2) > 8) {
+            setErrorText('Max file size is 8MB')
             return
         }
         const img = new Image();

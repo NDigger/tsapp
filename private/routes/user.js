@@ -9,6 +9,17 @@ UserRole = {
     MODERATOR: 2,
 }
 
+router.post('/', async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+    await user.createSession(res);
+    res.sendStatus(200);
+  } catch(err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+})
+
 router.get('/', async (req, res) => {
   try {
     const user = await User.fromToken(req.cookies.token)
@@ -90,17 +101,6 @@ router.post('/logout', async (req, res) => {
     res.sendStatus(200);
   } catch(e) {
     console.error(e);
-    res.sendStatus(500);
-  }
-})
-
-router.post('/', async (req, res) => {
-  try {
-    const user = await User.create(req.body);
-    await user.createSession(res);
-    res.sendStatus(200);
-  } catch(err) {
-    console.error(err);
     res.sendStatus(500);
   }
 })
