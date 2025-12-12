@@ -72,32 +72,6 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.put('/:id', async (req, res) => {
-  try {
-    const expectedModerator = await User.fromToken(req.cookies.token);
-    if (expectedModerator.role !== UserRole.MODERATOR) return res.sendStatus(401);
-    const user = User.fromId(req.params.id);
-    await user.setRole(req.body.role);
-    res.sendStatus(200);
-  } catch(e) {
-    console.error(e)
-    res.sendStatus(500)
-  }
-})
-
-router.delete('/:id', async(req, res) => {
-  try {
-    const expectedModerator = await User.fromToken(req.cookies.token);
-    if (expectedModerator.role !== UserRole.MODERATOR) return res.sendStatus(401);
-    const user = User.fromId(req.params.id); // User for deletion
-    await user.delete();
-    res.sendStatus(200)
-  } catch(e) {
-    console.error(e)
-    res.sendStatus(500)
-  }
-})
-
 router.delete('/', async(req, res) => {
   try {
     const user = await User.fromToken(req.cookies.token);
@@ -130,5 +104,36 @@ router.post('/', async (req, res) => {
     res.sendStatus(500);
   }
 })
+
+// MODERATORS ONLY
+const isModerator = async () => {
+  const expectedModerator = await User.fromToken(req.cookies.token);
+  return expectedModerator.role === UserRole.MODERATOR;
+}
+
+router.put('/:id', async (req, res) => {
+  try {
+    if (!isModerator()) return res.sendStatus(401);
+    const user = User.fromId(req.params.id);
+    await user.setRole(req.body.role);
+    res.sendStatus(200);
+  } catch(e) {
+    console.error(e)
+    res.sendStatus(500)
+  }
+})
+
+router.delete('/:id', async(req, res) => {
+  try {
+    if (!isModerator()) return res.sendStatus(401);
+    const user = User.fromId(req.params.id); // User for deletion
+    await user.delete();
+    res.sendStatus(200)
+  } catch(e) {
+    console.error(e)
+    res.sendStatus(500)
+  }
+})
+
 
 module.exports = router;
