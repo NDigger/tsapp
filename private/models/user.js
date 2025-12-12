@@ -10,7 +10,7 @@ class User {
         'INSERT INTO users(first_name, last_name, email, password) VALUES($1,$2,$3,$4) RETURNING *', 
             [firstName, lastName, email, password]
         );
-        return new User(User.#dbToJsObj(res.rows[0]));
+        return new this(User.#dbToJsObj(res.rows[0]));
     }
 
     static async getById(id) {
@@ -51,13 +51,13 @@ class User {
     static async fromToken(token) {
         const userData = await User.getByToken(token);
         if (userData === undefined) return undefined;
-        return new User(User.#dbToJsObj(userData));
+        return new this(User.#dbToJsObj(userData));
     }
 
     static async fromId(userId) {
         const userData = await User.getById(userId);
         if (userData === undefined) return undefined;
-        return new User(User.#dbToJsObj(userData));
+        return new this(User.#dbToJsObj(userData));
     }
 
     // Returns user if login has validated
@@ -67,7 +67,7 @@ class User {
         );
         if (dbRes.rows.length === 0) return undefined
         const userData = dbRes.rows[0]
-        return new User(User.#dbToJsObj(userData));
+        return new this(User.#dbToJsObj(userData));
     }
 
     async setLocation({street, place, psc}) {

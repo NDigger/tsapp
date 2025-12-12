@@ -4,11 +4,13 @@ const router = express.Router();
 const { getBase64Image } = require('../models/images');
 const { getSellerItems, getSellerItem } = require('../models/seller');
 const User = require('../models/user');
+const Seller = require('../models/seller');
 const { removeItem } = require('../models/items')
 
 router.get('/items', async (req, res) => {
     try {
-        let items = await getSellerItems(req);
+        const seller = await Seller.fromToken(req.cookies.token);
+        let items = await seller.getItems(req);
         res.send(items);
     } catch(e) {
         console.error(e);

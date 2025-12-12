@@ -3,31 +3,48 @@ const { query } = require('../dbmodel');
 
 const { getBase64Image } = require('../models/images');
 
-const getSellerItems = async req => {
-    const user = await User.getByToken(req.cookies.token);
-    let items = await query('SELECT * FROM items WHERE user_id=$1', [user.id]);
-    items = items.rows;
-    for (let item of items) {
-        const itemSizes = await getSellerSizedItems(item.id);
-        item.sizes = itemSizes;
-        const imageBase64 = getBase64Image(item.image_path);
-        if (imageBase64) item.imageBase64 = imageBase64;
-    }
-    return items;
-}
+const prepareItem = (item, itemSizes) => {
+    item.sizes = []
+    const imageBase64 = getBase64Image(item.image_path);
+    if (imageBase64) item.imageBase64 = imageBase64;
+    delete item.image_path;
 
-const getSellerSizedItems = async itemId => {
-    const items = await query('SELECT * FROM item_sizes WHERE item_id=$1', [itemId]);
-    return items.rows;
-}
+    itemSizes.forEach(isz => {
+        item.sizes.push({
+            name: isz.name, 
+            quantity: isz.quantity
+        })
+    })
 
-const getSellerItem = async itemId => {
-    let item = await query('SELECT * FROM items WHERE id=$1', [itemId]);
-    item = item.rows[0];
-    const itemSizes = await getSellerSizedItems(itemId);
-    item.sizes = itemSizes;
-    item.imageBase64 = getBase64Image(item.image_path);
     return item;
 }
 
-module.exports = { getSellerItems, getSellerItem };
+class Item {
+    static async getSizes(itemId) {
+        const items = await query('SELECT * FROM item_sizes WHERE item_id=$1', [itemId]);
+        return items.rows;
+    }
+
+    static async get(itemId) {
+        let item = await query('SELECT * FROM items WHERE id=$1', [itemId]);
+        item = item.rows[0];
+        const itemSizes = await Item.getSizes(itemId);
+        item.sizes = itemSizes;
+        item.imageBase64 = getBase64Image(item.image_path);
+        return item;
+    }
+}
+
+class Seller extends User {
+    async getItems() {
+        let items = await query('SELECT * FROM items WHERE seller_id=$1', [this.id]);
+        items = items.rows;
+        let itemsSizes = await query('SELECT isz.name, isz.item_id, isz.quantity FROM items AS i LEFT JOIN item_sizes AS isz ON i.id=isz.item_id WHERE seller_id=$1', [this.id]);
+        itemsSizes = itemsSizes.rows;
+
+        items = items.map(item => prepareItem(item, itemsSizes.filter(isz => isz.item_id === item.id)));
+        return items;
+    }
+}
+
+module.exports = Seller;
