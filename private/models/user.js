@@ -127,12 +127,13 @@ class User {
 
     async getCartItems() {
         let cartItems = await query(
-            'SELECT cart.*, items.*, item_sizes.*, items.id AS item_id, items.user_id AS seller_id, items.name AS item_name, item_sizes.id AS sized_item_id, item_sizes.name AS item_size, cart.user_id AS user_id FROM cart LEFT JOIN item_sizes ON item_sizes.id=cart.item_id LEFT JOIN items ON items.id=item_sizes.item_id WHERE cart.user_id=$1',
+            'SELECT cart.*, items.*, item_sizes.*, items.id AS item_id, items.seller_id AS seller_id, items.name AS item_name, item_sizes.id AS sized_item_id, item_sizes.name AS item_size, cart.user_id AS user_id FROM cart LEFT JOIN item_sizes ON item_sizes.id=cart.item_id LEFT JOIN items ON items.id=item_sizes.item_id WHERE cart.user_id=$1',
             [this.id]
         )
         cartItems = cartItems.rows;
         for (let item of cartItems) {
             item.imageBase64 = getBase64Image(item.image_path);
+            delete item.image_path;
         }
         return cartItems
     }
