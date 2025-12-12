@@ -41,13 +41,15 @@ class User {
         for (const [key, value] of Object.entries(obj)) this[key] = value;
     }
 
-    static dbToJsObj(user) {
+    static dbToJsObj(userData) {
         return {
-            id: user.id,
-            firstName: user.first_name,
-            lastName: user.last_name,
-            role: user.role,
-            email: user.email
+            id: userData.id,
+            firstName: userData.first_name,
+            lastName: userData.last_name,
+            role: userData.role,
+
+            email: userData.email,
+            password: userData.password,
         }
     }
 
@@ -109,10 +111,8 @@ class User {
         User.#writeToken(res, token);
     }
 
-    static async updatePassword(userId, newPassword) {
-        console.log(userId, newPassword)
-        const user = await query('UPDATE users SET password=$1 WHERE id=$2 RETURNING *', [newPassword, userId])
-        console.log(user.rows[0])
+    async updatePassword(newPassword) {
+        await query('UPDATE users SET password=$1 WHERE id=$2 RETURNING *', [newPassword, this.id])
     }
 }
 

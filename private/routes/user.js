@@ -23,11 +23,9 @@ router.get('/', async (req, res) => {
 router.get('/by-login', async (req, res) => {
   try {
     const user = await User.fromLogin(req.query);
-    if (user == undefined) res.sendStatus(401).json({ error: "Invalid credentials" });
-    else {
-      await user.createSession(res);
-      res.sendStatus(200);
-    }
+    if (user == undefined) return res.sendStatus(401).json({ error: "Invalid credentials" });
+    await user.createSession(res);
+    res.sendStatus(200);
   } catch(e) {
     console.error(e)
     res.sendStatus(500)
@@ -36,10 +34,11 @@ router.get('/by-login', async (req, res) => {
 
 router.put('/password', async (req, res) => {
   try {
-    const user = await User.getByToken(req.cookies.token);
-    if (user.password !== req.body.oldPassword) return res.status(401).send('Old password is wrong');
-    if (user.password === req.body.newPassword) return res.status(401).send("New password can not be the same");
-    await User.updatePassword(user.id, req.body.newPassword)
+    const {oldPassword, newPassword} = req.body;
+    const user = await User.fromToken(req.cookies.token);
+    if (user.password !== oldPassword) return res.status(401).send('Old password is wrong');
+    if (user.password === newPassword) return res.status(401).send("New password can not be the same");
+    await user.updatePassword(newPassword);
     res.sendStatus(200)
   } catch(e) {
     console.error(e)
