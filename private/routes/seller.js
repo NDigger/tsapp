@@ -5,8 +5,6 @@ const User = require('../models/user');
 const Seller = require('../models/seller');
 const Item = require('../models/item');
 
-const { removeItem } = require('../models/items')
-
 router.get('/items', async (req, res) => {
     try {
         const seller = await Seller.fromToken(req.cookies.token);

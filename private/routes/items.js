@@ -2,9 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const router = express.Router();
-const { getItems, getItem } = require('../models/items');
 
 const Seller = require('../models/seller');
+const Item = require('../models/item');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -41,7 +41,7 @@ router.post('/', uploadItemImage.single('image'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const limit = 15;
-    const {items, count} = await getItems(req, limit, parseInt(Number(req.query.page ?? 0) * limit));
+    const {items, count} = await Item.getList(req, limit, parseInt(Number(req.query.page ?? 0) * limit));
     res.json({
       items: items,
       itemsCount: count,
