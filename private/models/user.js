@@ -65,11 +65,10 @@ class User {
         return new User(User.dbToJsObj(userData));
     }
 
-    static async setLocation(req, {street, place, psc}) {
-        const user = await User.getByToken(req.cookies.token);
+    async setLocation({street, place, psc}) {
         const location = await query(
             'INSERT INTO locations(user_id, street, place, psc) VALUES($1, $2, $3, $4) ON CONFLICT(user_id) DO UPDATE SET street=EXCLUDED.street, place=EXCLUDED.place, psc=EXCLUDED.psc RETURNING street, place, psc',
-            [user.id, street, place, psc]
+            [this.id, street, place, psc]
         );
         return location.rows[0];
     }

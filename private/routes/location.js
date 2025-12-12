@@ -4,7 +4,8 @@ const User = require('../models/user');
 
 router.post('/', async (req, res) => {
     try {
-        const location = await User.setLocation(req, req.body);
+        const user = await User.fromToken(req.cookies.token);
+        const location = await user.setLocation(req.body);
         res.send(location);
     } catch(e) {
         console.error(e)
