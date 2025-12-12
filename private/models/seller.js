@@ -20,12 +20,13 @@ const prepareItem = (item, itemSizes) => {
 }
 
 class Seller extends User {
-    async postItem(req) {
+    async postItem({name, material, price, fullFileName,
+        sizeCountXS, sizeCountS, sizeCountL, sizeCountXL, sizeCountXXL, sizeCountXXXL
+    }) {
         // req.body.fullFileName is added to req.body with multer middleware
-        const { name, material, price } = req.body;
         const item = await query(
             'INSERT INTO items(seller_id, name, image_path, material, price) VALUES($1, $2, $3, $4, $5) RETURNING *',
-            [this.id, name, req.body.fullFileName, material, price]
+            [this.id, name, fullFileName, material, price]
         );
         const itemId = item.rows[0].id;
 
@@ -46,12 +47,12 @@ class Seller extends User {
                 sizedItems.push(sizedItem);
             }
         };
-        await setSizedItemIfHasCount(req.body.sizeCountXS, 'XS');
-        await setSizedItemIfHasCount(req.body.sizeCountS, 'S');
-        await setSizedItemIfHasCount(req.body.sizeCountL, 'L');
-        await setSizedItemIfHasCount(req.body.sizeCountXL, 'XL');
-        await setSizedItemIfHasCount(req.body.sizeCountXXL, 'XXL');
-        await setSizedItemIfHasCount(req.body.sizeCountXXXL, 'XXXL');
+        await setSizedItemIfHasCount(sizeCountXS, 'XS');
+        await setSizedItemIfHasCount(sizeCountS, 'S');
+        await setSizedItemIfHasCount(sizeCountL, 'L');
+        await setSizedItemIfHasCount(sizeCountXL, 'XL');
+        await setSizedItemIfHasCount(sizeCountXXL, 'XXL');
+        await setSizedItemIfHasCount(sizeCountXXXL, 'XXXL');
         return {item: item.rows[0], sizedItems: sizedItems};
     }
 
