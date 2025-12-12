@@ -1,6 +1,8 @@
 const { query } = require('../dbmodel');
 const crypto = require('crypto');
 
+const { getBase64Image } = require('../models/images');
+
 class User {
     // Creates and returns a new user object
     static async create({ firstName, lastName, email, password }) {
@@ -8,7 +10,7 @@ class User {
         'INSERT INTO users(first_name, last_name, email, password) VALUES($1,$2,$3,$4) RETURNING *', 
             [firstName, lastName, email, password]
         );
-        return new User(User.dbToJsObj(res.rows[0]));
+        return new User(User.#dbToJsObj(res.rows[0]));
     }
 
     static async getById(id) {
@@ -34,7 +36,7 @@ class User {
         for (const [key, value] of Object.entries(obj)) this[key] = value;
     }
 
-    static dbToJsObj(userData) {
+    static #dbToJsObj(userData) {
         return {
             id: userData.id,
             firstName: userData.first_name,
@@ -49,13 +51,13 @@ class User {
     static async fromToken(token) {
         const userData = await User.getByToken(token);
         if (userData === undefined) return undefined;
-        return new User(User.dbToJsObj(userData));
+        return new User(User.#dbToJsObj(userData));
     }
 
     static async fromId(userId) {
         const userData = await User.getById(userId);
         if (userData === undefined) return undefined;
-        return new User(User.dbToJsObj(userData));
+        return new User(User.#dbToJsObj(userData));
     }
 
     // Returns user if login has validated
@@ -65,7 +67,7 @@ class User {
         );
         if (dbRes.rows.length === 0) return undefined
         const userData = dbRes.rows[0]
-        return new User(User.dbToJsObj(userData));
+        return new User(User.#dbToJsObj(userData));
     }
 
     async setLocation({street, place, psc}) {
@@ -92,8 +94,8 @@ class User {
 
     static #writeToken(res, token) {
         res.cookie("token", token, {
-            // sameSite: "none",
-            // secure: false,
+            sameSite: "lax",
+            secure: true,
             maxAge: 24*60*60*60*1000
         });
     }
@@ -106,6 +108,34 @@ class User {
 
     async updatePassword(newPassword) {
         await query('UPDATE users SET password=$1 WHERE id=$2 RETURNING *', [newPassword, this.id])
+    }
+
+    // Cart methods
+    async addCartItem(sizedItemId, quantity) {
+        const cartItem = await query(
+            'INSERT INTO cart(user_id, item_id, item_quantity) VALUES($1, $2, $3) ON CONFLICT(user_id, item_id) DO UPDATE SET item_quantity=EXCLUDED.item_quantity RETURNING *',
+            [this.id, sizedItemId, quantity]
+        );
+        return cartItem;
+    }
+
+    async getCartItems() {
+        let cartItems = await query(
+            'SELECT cart.*, items.*, item_sizes.*, items.id AS item_id, items.user_id AS seller_id, items.name AS item_name, item_sizes.id AS sized_item_id, item_sizes.name AS item_size, cart.user_id AS user_id FROM cart LEFT JOIN item_sizes ON item_sizes.id=cart.item_id LEFT JOIN items ON items.id=item_sizes.item_id WHERE cart.user_id=$1',
+            [this.id]
+        )
+        cartItems = cartItems.rows;
+        for (let item of cartItems) {
+            item.imageBase64 = getBase64Image(item.image_path);
+        }
+        return cartItems
+    }
+
+    async removeCartItem(sizedItemId) {
+        await query(
+            'DELETE FROM cart WHERE user_id=$1 AND item_id=$2', 
+            [this.id, sizedItemId]
+        );  
     }
 }
 

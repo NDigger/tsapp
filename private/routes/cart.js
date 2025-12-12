@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { addCartItem, getCartItems, removeCartItem } = require('../models/cart');
+const User = require('../models/user');
 
 router.post('/', async (req, res) => {
     try {
-        await addCartItem(req);
+        const user = await User.fromToken(req.cookies.token);
+        await user.addCartItem(req.body.sizedItem.id, req.body.quantity);
         res.sendStatus(200);
     } catch(e) {
         res.sendStatus(500);
@@ -15,7 +16,8 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const items = await getCartItems(req);
+        const user = await User.fromToken(req.cookies.token);
+        const items = await user.getCartItems();
         res.json(items);
     } catch(e) {
         res.sendStatus(500);
@@ -25,8 +27,10 @@ router.get('/', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        await removeCartItem(req);
-        const items = await getCartItems(req);
+        const user = User.fromToken(req.cookies.token);
+        const sizedItemId = req.params.id;
+        await user.removeCartItem(sizedItemId);
+        const items = await user.getCartItems();
         res.json(items);
     } catch(e) {
         res.sendStatus(500);
