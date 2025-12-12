@@ -1,43 +1,23 @@
 const { query } = require('../dbmodel');
 const { getBase64Image } = require('../models/images');
 
+const Sort = {
+    NONE: '',
+    HIGHEST_PRICE: 'highest-price',
+    LOWEST_PRICE: 'lowest-price',
+    NAME: 'name',
+    NAME_REVERSE: 'name-reverse'
+}
+
+const SortQueries = {
+    [Sort.NONE]: '',
+    [Sort.LOWEST_PRICE]: 'ORDER BY sub.price ASC',
+    [Sort.HIGHEST_PRICE]: 'ORDER BY sub.price DESC',
+    [Sort.NAME]: 'ORDER BY sub.name ASC',
+    [Sort.NAME_REVERSE]: 'ORDER BY sub.name DESC',
+}
+
 class Item {
-    static async addItem(req) {
-        // req.body.fullFileName is added to req.body with multer middleware
-        const { name, material, price } = req.body;
-        const user = await User.getByToken(req.cookies.token);
-        const item = await query(
-            'INSERT INTO items(seller_id, name, image_path, material, price) VALUES($1, $2, $3, $4, $5) RETURNING *',
-            [user.id, name, req.body.fullFileName, material, price]
-        );
-        const itemId = item.rows[0].id;
-
-        const sizedItems = [];
-
-        const setSizedItem = async(itemId, size) => {
-            const item = await query(
-                'INSERT INTO item_sizes(item_id, name, quantity) VALUES($1, $2, $3) ON CONFLICT (item_id, name) DO UPDATE SET quantity=EXCLUDED.quantity RETURNING *',
-                [itemId, size.name, size.quantity]
-            );
-            return item.rows[0];
-        }
-
-        const setSizedItemIfHasCount = async (sizeCounterStr, sizeName) => {
-            const sizeCount = parseInt(sizeCounterStr);
-            if (sizeCount > 0) {
-                const sizedItem = await setSizedItem(itemId, { quantity: sizeCount, name: sizeName});
-                sizedItems.push(sizedItem);
-            }
-        };
-        await setSizedItemIfHasCount(req.body.sizeCountXS, 'XS');
-        await setSizedItemIfHasCount(req.body.sizeCountS, 'S');
-        await setSizedItemIfHasCount(req.body.sizeCountL, 'L');
-        await setSizedItemIfHasCount(req.body.sizeCountXL, 'XL');
-        await setSizedItemIfHasCount(req.body.sizeCountXXL, 'XXL');
-        await setSizedItemIfHasCount(req.body.sizeCountXXXL, 'XXXL');
-        return {item: item.rows[0], sizedItems: sizedItems};
-    }
-
     static async #getSizesById(itemId) {
         const items = await query('SELECT * FROM item_sizes WHERE item_id=$1', [itemId]);
         return items.rows;

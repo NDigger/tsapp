@@ -60,8 +60,8 @@ const getItems = async (req, limit, offset) => {
         `
         SELECT *
         FROM (
-            SELECT DISTINCT ON(i.id) i.id, i.name, i.image_path, i.material, i.price, i.user_id FROM items AS i 
-            LEFT JOIN item_sizes AS s ON s.item_id=i.id 
+            SELECT DISTINCT ON(i.id) i.id, i.name, i.image_path, i.material, i.price, i.seller_id FROM items AS i 
+            LEFT JOIN item_sizes AS s ON s.item_id=i.id
             WHERE s.quantity > 0 ${filtersQuery} 
             LIMIT $1 OFFSET $2
         ) AS sub ${querySort}
