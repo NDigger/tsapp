@@ -62,12 +62,4 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-// app.get('/data', (req, res) => {
-//   const image = fs.readFileSync('image.png', { encoding: 'base64' });
-//   res.json({
-//     message: 'primer izobrazhenia',
-//     image: `data:image/png;base64,${image}`
-//   });
-// });
-
 module.exports = router
