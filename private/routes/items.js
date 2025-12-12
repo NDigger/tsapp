@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-      const item = await getItem(req.params.id);
+      const item = await Item.getById(req.params.id);
       res.send(item);
     } catch(e) {
       console.error(e);
