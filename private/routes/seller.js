@@ -10,7 +10,7 @@ const { removeItem } = require('../models/items')
 router.get('/items', async (req, res) => {
     try {
         const seller = await Seller.fromToken(req.cookies.token);
-        let items = await seller.getItems(req);
+        const items = await seller.getItems();
         res.send(items);
     } catch(e) {
         console.error(e);
@@ -22,7 +22,6 @@ router.get('/item/:itemId', async (req, res) => {
     try {
         const seller = await User.getByToken(req.cookies.token);
         const item = await Item.getById(req.params.itemId);
-        // If user is seller then send item info
         if (item.seller_id === seller.id) res.json(item);
         else res.sendStatus(401);
     } catch(e) {
@@ -34,9 +33,9 @@ router.get('/item/:itemId', async (req, res) => {
 router.delete('/item/:itemId', async (req, res) => {
     try {
         const user = await User.getByToken(req.cookies.token);
-        let item = await getSellerItem(req.params.itemId);
-        if (item.user_id === user.id) {
-            await removeItem(item.id);
+        const item = await Item.getById(req.params.itemId);
+        if (item.seller_id === user.id) {
+            await Item.removeById(item.id);
             res.sendStatus(200);
         } 
         else res.sendStatus(401);

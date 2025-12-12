@@ -1,6 +1,5 @@
 const { query } = require('../dbmodel');
 const crypto = require('crypto');
-
 const { getBase64Image } = require('../models/images');
 
 class User {
@@ -10,7 +9,7 @@ class User {
         SELLER: 1,
         MODERATOR: 2,
     }
-    
+
     // Creates and returns a new user object
     static async create({ firstName, lastName, email, password }) {
         const res = await query(

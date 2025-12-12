@@ -16,6 +16,12 @@ class Item {
         delete item.image_path;
         return item;
     }
+
+    static async removeById(itemId) {
+        await query('DELETE FROM items WHERE id=$1', [itemId]);
+        await query('DELETE FROM item_sizes WHERE item_id=$1', [itemId]);
+    }
+
 }
 
 module.exports = Item;

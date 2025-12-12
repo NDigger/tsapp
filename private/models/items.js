@@ -16,7 +16,7 @@ const addItem = async req => {
     const { name, material, price } = req.body;
     const user = await User.getByToken(req.cookies.token);
     const item = await query(
-        'INSERT INTO items(user_id, name, image_path, material, price) VALUES($1, $2, $3, $4, $5) RETURNING *',
+        'INSERT INTO items(seller_id, name, image_path, material, price) VALUES($1, $2, $3, $4, $5) RETURNING *',
         [user.id, name, req.body.fullFileName, material, price]
     );
     const itemId = item.rows[0].id;
@@ -36,11 +36,6 @@ const addItem = async req => {
     await setSizedItemIfHasCount(req.body.sizeCountXXL, 'XXL');
     await setSizedItemIfHasCount(req.body.sizeCountXXXL, 'XXXL');
     return {item: item.rows[0], sizedItems: sizedItems};
-}
-
-const removeItem = async itemId => {
-    await query('DELETE FROM items WHERE id=$1', [itemId]);
-    await query('DELETE FROM item_sizes WHERE item_id=$1', [itemId]);
 }
 
 const getSizedItems = async itemId => {
@@ -140,4 +135,4 @@ const getItems = async (req, limit, offset) => {
     return {items: items, count: itemsCount.rowCount};
 }
 
-module.exports = { addItem, removeItem, getItems, getItem };
+module.exports = { addItem, getItems, getItem };
