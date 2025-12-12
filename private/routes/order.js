@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-
-const { getUserOrders, createOrder } = require('../models/order');
+const User = require('../models/user');
 
 router.post('/', async (req, res) => {
     try {
-        const order = await createOrder(req);
+        const user = await User.fromToken(req.cookies.token);
+        const order = await user.pushOrder(req.body.items);
         res.json(order);
     } catch(e) {
         console.error(e);
@@ -15,7 +15,8 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const orders = await getUserOrders(req);
+        const user = await User.fromToken(req.cookies.token);
+        const orders = await user.getOrders(req);
         res.send(orders);
     } catch(e) {
         console.error(e);
