@@ -18,9 +18,9 @@ class User {
     static async create({ firstName, lastName, email, password }) {
         const res = await query(
         'INSERT INTO users(first_name, last_name, email, password) VALUES($1,$2,$3,$4) RETURNING *', 
-        [firstName, lastName, email, password]
+            [firstName, lastName, email, password]
         );
-        return res.rows[0];
+        return new User(User.dbToJsObj(res.rows[0]));
     }
 
     static async getById(id) {
@@ -82,9 +82,9 @@ class User {
         await query('UPDATE users SET role=$1 WHERE id=$2', [req.body.role, req.params.id])
     }
 
-    static async deleteById(userId) {
-        await query('DELETE FROM sessions WHERE user_id=$1', [userId])
-        await query('DELETE FROM users WHERE id=$1', [userId])
+    async delete() {
+        await query('DELETE FROM sessions WHERE user_id=$1', [this.id])
+        await query('DELETE FROM users WHERE id=$1', [this.id])
     }
 
     // Returns user if login has validated
@@ -96,11 +96,18 @@ class User {
         return user.rows[0];
     }
 
-    // Creates a session and returns session token.
-    static async createSession(userId) {
+    static #writeToken(res, token) {
+        res.cookie("token", token, {
+            // sameSite: "none",
+            // secure: false,
+            maxAge: 24*60*60*60*1000
+        });
+    }
+
+    async createSession(res) {
         const token = crypto.randomBytes(32).toString('hex');
-        await query('INSERT INTO sessions(user_id, token) VALUES($1,$2)', [userId, token])
-        return token;
+        await query('INSERT INTO sessions(user_id, token) VALUES($1,$2)', [this.id, token])
+        User.#writeToken(res, token);
     }
 
     static async updatePassword(userId, newPassword) {
@@ -110,5 +117,4 @@ class User {
     }
 }
 
-// module.exports = { UserRole, updateUserPassword, deleteUserById, createUser, updateUser, getUserByToken, tryUserLogin, createSession, cookieToken, getUserById }
 module.exports = User

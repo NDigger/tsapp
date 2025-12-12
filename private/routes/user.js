@@ -3,16 +3,6 @@ const router = express.Router();
 
 const User = require('../models/user');
 
-// Writes a token into a cookie.
-// 60 days token storage
-const cookieToken = (res, token) => {
-    res.cookie("token", token, {
-        // sameSite: "none",
-        // secure: false,
-        maxAge: 24*60*60*60*1000
-    });
-}
-
 router.get('/', async (req, res) => {
   try {
     const user = await User.getByToken(req.cookies.token)
@@ -105,8 +95,8 @@ router.delete('/:id', async(req, res) => {
 
 router.delete('/', async(req, res) => {
   try {
-    const user = User.getByToken(req.cookies.token)
-    await deleteUserById(user.id)
+    const user = await User.fromToken(req.cookies.token);
+    await user.delete()
     res.clearCookie('token');
     res.sendStatus(200)
   } catch(e) {
@@ -128,9 +118,7 @@ router.post('/logout', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const user = await User.create(req.body);
-    const token = await User.createSession(user.id);
-    cookieToken(res, token);
-    // await createUserLocation(user.id);
+    await user.createSession(res);
     res.sendStatus(200);
   } catch(err) {
     console.error(err);
