@@ -2,11 +2,11 @@ const { query } = require('../dbmodel');
 const crypto = require('crypto');
 
 // Definition of user roles. 
-UserRole = {
-    PURCHASER: 0,
-    SELLER: 1,
-    MODERATOR: 2,
-}
+// UserRole = {
+//     PURCHASER: 0,
+//     SELLER: 1,
+//     MODERATOR: 2,
+// }
 
 class User {
     // Creates and returns a new user object
@@ -28,6 +28,21 @@ class User {
             'SELECT * FROM users WHERE id=$1', [result.rows[0].user_id]
         );
         return user.rows[0];
+    }
+
+    static async setLocation(req, {street, place, psc}) {
+        const user = await User.getByToken(req.cookies.token);
+        const location = await query(
+            'INSERT INTO locations(user_id, street, place, psc) VALUES($1, $2, $3, $4) ON CONFLICT(user_id) DO UPDATE SET street=EXCLUDED.street, place=EXCLUDED.place, psc=EXCLUDED.psc RETURNING *',
+            [user.id, street, place, psc]
+        );
+        return location.rows[0];
+    }
+
+    static async getLocation(req) {
+        const user = await User.getByToken(req.cookies.token);
+        const location = await query('SELECT * FROM locations WHERE user_id=$1', [user.id]);
+        return location.rows[0];
     }
 
     static async getById(id) {

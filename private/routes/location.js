@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { updateUserLocation, getUserLocation } = require('../models/location')
+const User = require('../models/user');
 
 router.post('/', async (req, res) => {
     try {
-        const location = await updateUserLocation(req);
+        const location = await User.setLocation(req, req.body);
         res.send(location);
     } catch(e) {
         console.error(e)
@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const location = await getUserLocation(req);
+        const location = await User.getLocation(req);
         res.send(location ?? {});
     } catch(e) {
         console.error(e)

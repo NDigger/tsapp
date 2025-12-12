@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 
 const User = require('../models/user');
-const { createUserLocation } = require('../models/location');
 
 // Writes a token into a cookie.
 // 60 days token storage
@@ -131,7 +130,7 @@ router.post('/', async (req, res) => {
     const user = await User.create(req.body);
     const token = await User.createSession(user.id);
     cookieToken(res, token);
-    await createUserLocation(user.id);
+    // await createUserLocation(user.id);
     res.sendStatus(200);
   } catch(err) {
     console.error(err);
