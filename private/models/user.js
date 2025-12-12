@@ -65,6 +65,16 @@ class User {
         return new User(User.dbToJsObj(userData));
     }
 
+    // Returns user if login has validated
+    static async fromLogin({email, password}) {
+        const dbRes = await query(
+            'SELECT * FROM users WHERE email=$1 AND password=$2', [email, password]
+        );
+        if (dbRes.rows.length === 0) return undefined
+        const userData = dbRes.rows[0]
+        return new User(User.dbToJsObj(userData));
+    }
+
     async setLocation({street, place, psc}) {
         const location = await query(
             'INSERT INTO locations(user_id, street, place, psc) VALUES($1, $2, $3, $4) ON CONFLICT(user_id) DO UPDATE SET street=EXCLUDED.street, place=EXCLUDED.place, psc=EXCLUDED.psc RETURNING street, place, psc',
@@ -85,15 +95,6 @@ class User {
     async delete() {
         await query('DELETE FROM sessions WHERE user_id=$1', [this.id])
         await query('DELETE FROM users WHERE id=$1', [this.id])
-    }
-
-    // Returns user if login has validated
-    static async tryLogin(req) {
-        const { email, password } = req.query;
-        const user = await query(
-            'SELECT * FROM users WHERE email=$1 AND password=$2', [email, password]
-        );
-        return user.rows[0];
     }
 
     static #writeToken(res, token) {

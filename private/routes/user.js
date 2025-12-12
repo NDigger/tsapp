@@ -23,12 +23,11 @@ router.get('/', async (req, res) => {
 
 router.get('/by-login', async (req, res) => {
   try {
-    const user = await User.tryLogin(req);
+    const user = await User.fromLogin(req.query);
     if (user == undefined) res.sendStatus(401).json({ error: "Invalid credentials" });
     else {
-        const token = await User.createSession(user.id);
-        cookieToken(res, token)
-        res.sendStatus(200);
+      await user.createSession(res);
+      res.sendStatus(200);
     }
   } catch(err) {
     console.error(err)
