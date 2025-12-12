@@ -9,6 +9,11 @@ const crypto = require('crypto');
 // }
 
 class User {
+    id
+    firstName
+    lastName
+    role
+
     // Creates and returns a new user object
     static async create({ firstName, lastName, email, password }) {
         const res = await query(
@@ -16,6 +21,13 @@ class User {
         [firstName, lastName, email, password]
         );
         return res.rows[0];
+    }
+
+    static async getById(id) {
+        const user = await query(
+            'SELECT * FROM users WHERE id=$1', [id]
+        );
+        return user.rows[0];
     }
 
     // Returns user if token is valid
@@ -30,6 +42,29 @@ class User {
         return user.rows[0];
     }
 
+    constructor(obj) {
+        for (const [key, value] of Object.entries(obj)) this[key] = value;
+    }
+
+    static dbToJsObj(user) {
+        return {
+            id: user.id,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            role: user.role,
+        }
+    }
+
+    static async fromToken(token) {
+        const userData = await User.getByToken(token);
+        return new User(User.dbToJsObj(userData));
+    }
+
+    static async fromId(userId) {
+        const userData = await User.getById(userId);
+        return new User(User.dbToJsObj(userData));
+    }
+
     static async setLocation(req, {street, place, psc}) {
         const user = await User.getByToken(req.cookies.token);
         const location = await query(
@@ -39,17 +74,9 @@ class User {
         return location.rows[0];
     }
 
-    static async getLocation(req) {
-        const user = await User.getByToken(req.cookies.token);
-        const location = await query('SELECT street, place, psc FROM locations WHERE user_id=$1', [user.id]);
+    async getLocation() {
+        const location = await query('SELECT street, place, psc FROM locations WHERE user_id=$1', [this.id]);
         return location.rows[0];
-    }
-
-    static async getById(id) {
-        const user = await query(
-            'SELECT * FROM users WHERE id=$1', [id]
-        );
-        return user.rows[0];
     }
 
     static async update(req) {

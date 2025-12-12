@@ -14,7 +14,8 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const location = await User.getLocation(req);
+        const user = await User.fromToken(req.cookies.token);
+        const location = await user.getLocation();
         res.send(location ?? {});
     } catch(e) {
         console.error(e)
