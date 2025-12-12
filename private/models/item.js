@@ -55,8 +55,7 @@ class Item {
         }
         const querySort = SortQueries[req.query.sort]
 
-        const sizeQueryFilters = Object.entries(filters.sizes)
-        .filter(([key, value]) => value === true)
+        const sizeQueryFilters = Object.values(filters.sizes).filter(value => value === true)
         .map(([key]) => `s.name='${key}'`)
         const filtersQuery = 
         `AND price>=${filters.price.min} AND price<=${filters.price.max} ${sizeQueryFilters.length !== 0 ? `AND (${sizeQueryFilters.join(' OR ')})` : ''}`
