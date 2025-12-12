@@ -10,9 +10,21 @@
 
 services:
   backend:
-    image: t-shirtsapp-backend
-    volumes:
-      - ./private:/app/backend
+    # image: t-shirtsapp-backend
+    # command: npm run start
+    # volumes:
+      # - ./private:/app/backend
+    build: ./private
+    develop:
+      watch: 
+        - action: sync+restart
+          path: ./private
+          target: /app/backend
+          ignore: 
+            - node_modules/
+          initial_sync: true
+        - action: rebuild
+          path: package.json
     env_file: ./private/.env
     environment:
       NODE_ENV: production
@@ -22,9 +34,21 @@ services:
       db:
         condition: service_healthy
   frontend:
-    image: t-shirtsapp-frontend
-    volumes:
-      - ./public:/app/frontend
+    # image: t-shirtsapp-frontend
+    # volumes:
+    # - ./public:/app/frontend
+    # command: npx vite
+    build: ./public
+    develop:
+      watch: 
+        - action: sync
+          path: ./public
+          target: /app/frontend
+          ignore: 
+            - node_modules/
+          initial_sync: true
+        - action: rebuild
+          path: package.json
     ports:
       - 5173:5173
     depends_on:
@@ -45,7 +69,7 @@ services:
       - 5432
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
-      interval: 10s
+      interval: 1s
       timeout: 5s
       retries: 5
 volumes:
