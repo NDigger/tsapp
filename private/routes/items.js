@@ -2,7 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const router = express.Router();
-const { addItem, getItems, getItem } = require('../models/items');
+const { getItems, getItem } = require('../models/items');
+
+const Seller = require('../models/seller');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -20,7 +22,8 @@ const uploadItemImage = multer({ storage })
 
 router.post('/', uploadItemImage.single('image'), async (req, res) => {
   try {
-    await addItem(req);
+    const seller = await Seller.fromToken(req.cookies.token);
+    await seller.postItem(req);
     res.sendStatus(200);
   } catch(e) {
     console.error(e)
