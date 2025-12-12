@@ -81,8 +81,8 @@ class User {
         return location.rows[0];
     }
 
-    static async update(req) {
-        await query('UPDATE users SET role=$1 WHERE id=$2', [req.body.role, req.params.id])
+    async setRole(role) {
+        await query('UPDATE users SET role=$1 WHERE id=$2', [role, this.id])
     }
 
     async delete() {

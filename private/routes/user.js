@@ -74,9 +74,10 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const currentUser = await User.getByToken(req.cookies.token);
-    if (currentUser.role !== UserRole.MODERATOR) return res.sendStatus(401);
-    await updateUser(req);
+    const expectedModerator = await User.fromToken(req.cookies.token);
+    if (expectedModerator.role !== UserRole.MODERATOR) return res.sendStatus(401);
+    const user = User.fromId(req.params.id);
+    await user.setRole(req.body.role);
     res.sendStatus(200);
   } catch(e) {
     console.error(e)
