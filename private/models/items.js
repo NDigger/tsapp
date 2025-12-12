@@ -1,4 +1,4 @@
-const { getUserByToken } = require('./user');
+const User = require('./user');
 const { query } = require('../dbmodel');
 
 const { getBase64Image } = require ('../models/images');
@@ -14,7 +14,7 @@ const setSizedItem = async (itemId, size) => {
 const addItem = async req => {
     // req.body.fullFileName is added to req.body with multer middleware
     const { name, material, price } = req.body;
-    const user = await getUserByToken(req.cookies.token);
+    const user = await User.getByToken(req.cookies.token);
     const item = await query(
         'INSERT INTO items(user_id, name, image_path, material, price) VALUES($1, $2, $3, $4, $5) RETURNING *',
         [user.id, name, req.body.fullFileName, material, price]

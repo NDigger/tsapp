@@ -1,10 +1,10 @@
-const { getUserByToken } = require('./user');
+const User = require('./user');
 const { query } = require('../dbmodel');
 
 const { getBase64Image } = require('../models/images');
 
 const getSellerItems = async req => {
-    const user = await getUserByToken(req.cookies.token);
+    const user = await User.getByToken(req.cookies.token);
     let items = await query('SELECT * FROM items WHERE user_id=$1', [user.id]);
     items = items.rows;
     for (let item of items) {

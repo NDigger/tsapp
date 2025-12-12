@@ -1,9 +1,9 @@
-const { getUserByToken } = require('./user');
+const User = require('./user');
 const { query } = require('../dbmodel');
 const { getBase64Image } = require('./images');
 
 const createOrder = async req => {
-    const user = await getUserByToken(req.cookies.token);
+    const user = await User.getByToken(req.cookies.token);
     let order = await query(
         'INSERT INTO orders(user_id) VALUES($1) RETURNING *',
         [user.id]
@@ -36,7 +36,7 @@ const createOrder = async req => {
 }
 
 const getUserOrders = async req => {
-    const user = await getUserByToken(req.cookies.token);
+    const user = await User.getByToken(req.cookies.token);
     let orders = await query(
         'SELECT * FROM orders WHERE user_id=$1',
         [user.id]

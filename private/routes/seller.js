@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { getBase64Image } = require('../models/images');
 const { getSellerItems, getSellerItem } = require('../models/seller');
-const { getUserByToken } = require('../models/user');
+const User = require('../models/user');
 const { removeItem } = require('../models/items')
 
 router.get('/items', async (req, res) => {
@@ -18,7 +18,7 @@ router.get('/items', async (req, res) => {
 
 router.get('/item/:itemId', async (req, res) => {
     try {
-        const user = await getUserByToken(req.cookies.token);
+        const user = await User.getByToken(req.cookies.token);
         let item = await getSellerItem(req.params.itemId);
         if (item.user_id === user.id) res.json(item);
         else res.sendStatus(401);
@@ -30,7 +30,7 @@ router.get('/item/:itemId', async (req, res) => {
 
 router.delete('/item/:itemId', async (req, res) => {
     try {
-        const user = await getUserByToken(req.cookies.token);
+        const user = await User.getByToken(req.cookies.token);
         let item = await getSellerItem(req.params.itemId);
         if (item.user_id === user.id) {
             await removeItem(item.id);

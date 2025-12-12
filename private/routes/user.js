@@ -1,12 +1,22 @@
 const express = require('express');
 const router = express.Router();
 
-const { UserRole, deleteUserById, createUser, getUserByToken, tryUserLogin, createSession, cookieToken, getUserById, updateUser, updateUserPassword } = require('../models/user');
+const User = require('../models/user');
 const { createUserLocation } = require('../models/location');
+
+// Writes a token into a cookie.
+// 60 days token storage
+const cookieToken = (res, token) => {
+    res.cookie("token", token, {
+        // sameSite: "none",
+        // secure: false,
+        maxAge: 24*60*60*60*1000
+    });
+}
 
 router.get('/', async (req, res) => {
   try {
-    const user = await getUserByToken(req.cookies.token)
+    const user = await User.getByToken(req.cookies.token)
     if (user == undefined) res.sendStatus(401)
     const { id, first_name, last_name, email, role } = user;
     res.json({
@@ -24,10 +34,10 @@ router.get('/', async (req, res) => {
 
 router.get('/by-login', async (req, res) => {
   try {
-    const user = await tryUserLogin(req);
+    const user = await User.tryLogin(req);
     if (user == undefined) res.sendStatus(401).json({ error: "Invalid credentials" });
     else {
-        const token = await createSession(user.id);
+        const token = await User.createSession(user.id);
         cookieToken(res, token)
         res.sendStatus(200);
     }
@@ -39,10 +49,10 @@ router.get('/by-login', async (req, res) => {
 
 router.put('/password', async (req, res) => {
   try {
-    const user = await getUserByToken(req.cookies.token);
+    const user = await User.getByToken(req.cookies.token);
     if (user.password !== req.body.oldPassword) return res.status(401).send('Old password is wrong');
     if (user.password === req.body.newPassword) return res.status(401).send("New password can not be the same");
-    await updateUserPassword(user.id, req.body.newPassword)
+    await User.updatePassword(user.id, req.body.newPassword)
     res.sendStatus(200)
   } catch(e) {
     console.error(e)
@@ -52,9 +62,9 @@ router.put('/password', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const currentUser = await getUserByToken(req.cookies.token);
+    const currentUser = await User.getByToken(req.cookies.token);
     if (currentUser.role !== UserRole.MODERATOR) return res.sendStatus(401);
-    const findUser = await getUserById(req.params.id);
+    const findUser = await User.getById(req.params.id);
     if (findUser.id === currentUser.id) res.sendStatus(401);
     const { id, first_name, last_name, email, role } = findUser;
     res.json({
@@ -72,7 +82,7 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const currentUser = await getUserByToken(req.cookies.token);
+    const currentUser = await User.getByToken(req.cookies.token);
     if (currentUser.role !== UserRole.MODERATOR) return res.sendStatus(401);
     await updateUser(req);
     res.sendStatus(200);
@@ -84,7 +94,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async(req, res) => {
   try {
-    const currentUser = await getUserByToken(req.cookies.token);
+    const currentUser = await User.getByToken(req.cookies.token);
     if (currentUser.role !== UserRole.MODERATOR) return res.sendStatus(401);
     await deleteUserById(req.params.id)
     res.sendStatus(200)
@@ -96,7 +106,7 @@ router.delete('/:id', async(req, res) => {
 
 router.delete('/', async(req, res) => {
   try {
-    const user = getUserByToken(req.cookies.token)
+    const user = User.getByToken(req.cookies.token)
     await deleteUserById(user.id)
     res.clearCookie('token');
     res.sendStatus(200)
@@ -118,8 +128,8 @@ router.post('/logout', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const user = await createUser(req);
-    const token = await createSession(user.id);
+    const user = await User.create(req.body);
+    const token = await User.createSession(user.id);
     cookieToken(res, token);
     await createUserLocation(user.id);
     res.sendStatus(200);
