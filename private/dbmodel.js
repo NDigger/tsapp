@@ -1,6 +1,6 @@
 const { Pool } = require('pg');
 
-const { POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_DEV_HOST, DB_PORT } = process.env;
+const { POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT } = process.env;
 
 const pool = new Pool({
   host: DB_HOST,       // имя сервиса в docker-compose

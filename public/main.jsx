@@ -14,7 +14,7 @@ const Header = () => {
 
     return (
         <header>
-            <a href="/offers/index.html" className="header-button">T-Shirts Offers</a>
+            <a href="/offers/index.html" className="header-button bg-red">T-Shirts Offers</a>
             <nav id="user-buttons">
                 {!userData ?
                 <>

@@ -13,7 +13,7 @@ services:
     # image: t-shirtsapp-backend
     # command: npm run start
     # volumes:
-      # - ./private:/app/backend
+    #   - ./private:/app/backend
     build: ./private
     develop:
       watch: 

@@ -5,7 +5,6 @@ require('dotenv').config();
 const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const { query } = require('./dbmodel');
 
 // 200 — всё прошло успешно.
 // 400 — ошибка со стороны клиента (неверный запрос, нет нужных данных и т.п.).
