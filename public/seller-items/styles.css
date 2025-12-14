@@ -37,14 +37,6 @@ main {
     background-color: rgba(0, 0, 0, .1);
 }
 
-.item-card:nth-child(even) {
-    transform: skewY(-1.5deg);
-}
-
-.item-card:nth-child(odd) {
-    transform: skewY(1.5deg);
-}
-
 .item-card img {
     width: 220px;
     height: 220px;

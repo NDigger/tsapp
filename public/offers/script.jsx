@@ -124,7 +124,7 @@ const ItemCardsContainer = ({items, itemsCount}) => {
             </div>
             <nav id='item-navigation-buttons'>
                 <button onClick={() => shiftPage(-1)} disabled={currentPage <= 0}>Previous Page</button>
-                <p>{currentPage || 0}</p>
+                <p class='page'>{currentPage || 0}</p>
                 <button onClick={() => shiftPage(1)} disabled={(currentPage * limit + limit) > itemsCount}>Next Page</button>
             </nav>
         </>
@@ -190,7 +190,7 @@ const App = () => {
             {items.length > 0 
                 ? 
                 <>
-                    <h1>--- Fire T-Shirts offers! ---</h1>
+                    {/* <h1>--- Fire T-Shirts offers! ---</h1> */}
                     <FiltersAndSorts filters={filters} setFilters={setFilters} filterCount={filterCount} setFilterCount={setFilterCount} />
                     <ItemCardsContainer items={items} itemsCount={itemsCount} />
                 </>

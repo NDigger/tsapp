@@ -7,7 +7,7 @@ main > h1 {
 }
 
 #filters-sorts {
-    width: 100vw - 3000px;
+    width: calc(100vw - 200px);
     display: flex;
     justify-content: space-between;
     margin: 0px 50px;
@@ -95,16 +95,22 @@ main > h1 {
 
 #item-navigation-buttons {
     display: flex;
+    margin: 0 auto;
     justify-content: center;
     align-items: center;
     gap: 10px;
-    width: 100%;
+    width: min(800px, 100%);
     margin-top: 50px;
 }
 
 #item-navigation-buttons * {
+    flex: 1;
     font-size: 1.5rem;
     padding: 10px;
+}
+
+#item-navigation-buttons .page {
+    text-align: center;
 }
 
 #no-items-msg {

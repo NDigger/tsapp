@@ -15,7 +15,7 @@
 }
 
 :root {
-    --box-shadow-default: 0px 0px 4px gray;
+    --box-shadow-default: 0px 0px 3px gray;
 }
 
 html {
@@ -57,7 +57,6 @@ header {
 }
 
 #user-buttons * {
-    background-color: rgba(255, 255, 255, .4);
     padding: 5px 20px;
     border-radius: 50px;
 }
