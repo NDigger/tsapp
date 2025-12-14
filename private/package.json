@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node --watch server.js"
+    "start": "node --watch server.js",
+    "test": "jest"
   },
   "author": "NDagger",
   "license": "ISC",
@@ -18,5 +19,9 @@
     "multer": "^2.0.2",
     "nodemon": "^3.1.11",
     "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0"
   }
 }
