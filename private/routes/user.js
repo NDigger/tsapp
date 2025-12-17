@@ -123,7 +123,7 @@ router.delete('/:id', async(req, res) => {
   try {
     const isMod = await isModerator(req.cookies.token);
     if (!isMod) return res.sendStatus(401);
-    const user = User.fromId(req.params.id); // User for deletion
+    const user = await User.fromId(req.params.id); // User for deletion
     await user.delete();
     res.sendStatus(200)
   } catch(e) {

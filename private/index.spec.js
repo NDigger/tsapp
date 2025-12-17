@@ -100,5 +100,13 @@ describe('app', () => {
             .set('Cookie', `token=${mod.token}`)
             .expect(200)
         })
+        it('DELETE /:id', async () => {
+            const user = await createUser();
+            const mod = await createUser(User.Role.MODERATOR);
+            await request(app)
+            .delete(`/api/user/${user.id}`)
+            .set('Cookie', `token=${mod.token}`)
+            .expect(200)
+        })
     })
 })
