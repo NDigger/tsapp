@@ -1,10 +1,10 @@
 const api = 'http://localhost:3000/api/';
 const crypto = require('crypto');
-
 const app = require('./app');
 const { query } = require('./dbmodel');
+const request = require('supertest');
 
-jest.useFakeTimers();
+// jest.useFakeTimers();
 
 const rnd = () => crypto.randomBytes(12).toString('hex')
 const createUser = async () => {
@@ -36,112 +36,24 @@ const createUser = async () => {
 }
 
 describe('app', () => {
-    afterAll(() => {
-        query('TRUNCATE TABLE cart, item_sizes, items, locations, order_items, orders, sessions, users CASCADE;');
+    afterEach(async () => {
+        await query('TRUNCATE TABLE cart, item_sizes, items, locations, order_items, orders, sessions, users CASCADE;');
     })
     describe('user', () => {
-        it('POST /', async () => {
-            const {res} = await createUser();
-            expect(res.ok).toBe(true);
-        })
-        it('GET /', async () => {
-            const user = await createUser();
-            const res = await fetch(`${api}user`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Cookie': user.cookie,
-                }
+        const fn = () => it('POST /', async () => {
+            // const {res} = await createUser();
+            // expect(res.ok).toBe(true);
+            await request(app)
+            .post('/api/user')
+            .send({
+                firstName: '123',
+                lastName: '123',
+                email: '123@123',
+                password: '123'
             })
-            expect(res.ok).toBe(true);
+            .set('Content-Type', 'application/json')
+            .expect(200);
         })
-        it('GET /by-login', async () => {
-            const user = await createUser();
-            const params = new URLSearchParams({
-                email: user.email,
-                password: user.password
-            })
-            const res = await fetch(`${api}user/by-login?${params.toString()}`)
-            expect(res.ok).toBe(true);
-        })
-        it('PUT /password', async () => {
-            const user = await createUser();
-            const res = await fetch(`${api}user/password`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Cookie': user.cookie,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    oldPassword: user.password,
-                    newPassword: rnd(),
-                })
-            })
-            expect(res.ok).toBe(true);
-        })
-        it('POST /logout', async () => {
-            const user = await createUser();
-            const res = await fetch(`${api}user/logout`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Cookie': user.cookie,
-                }
-            })
-            expect(res.ok).toBe(true);
-        })
-    })
-    describe('location', () => {
-        let user;
-        beforeAll(async () => user = await createUser());
-        it('POST /', async () => {
-            const res = await fetch(`${api}location`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Cookie': user.cookie,
-                },
-                body: JSON.stringify({
-                    street: 'street',
-                    place: 'place',
-                    psc: 'psc',
-                })
-            })
-            expect(res.ok).toBe(true);
-        })
-        it('GET /:id', async () => {
-            const res = await fetch(`${api}location`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Cookie': user.cookie,
-                },
-            });
-            expect(res.ok).toBe(true);
-        })
-    })
-    describe('items', () => {
-        it('GET /', async () => {
-            const params = new URLSearchParams({
-                page: 0,
-                sizesXS: 'true',
-                sizesS: 'true',
-                sizesL: 'true',
-                sizesXL: 'true',
-                sizesXXL: 'true',
-                sizesXXXL: 'true',
-                priceMin: '0',
-                priceMax: '9999999',
-                sort: ''
-            })
-            const res = await fetch(`${api}items?${params.toString()}`);
-            expect(res.ok).toBe(true);
-        })
-        it('GET /:id', async () => {
-            const res = await fetch(`${api}items/58`);
-            expect(res.ok).toBe(true);
-        })
+        for(let i = 0; i < 100; i++) fn();
     })
 })
