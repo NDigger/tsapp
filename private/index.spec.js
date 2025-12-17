@@ -109,4 +109,30 @@ describe('app', () => {
             .expect(200)
         })
     })
+    describe('location', () => {
+        it('POST /', async () => {
+            const user = await createUser();
+            await request(app)
+            .post('/api/location')
+            .send({
+                street: 'street',
+                place: 'place',
+                psc: '123456',
+            })
+            .set('Content-Type', 'application/json')
+            .set('Cookie', `token=${user.token}`)
+            .expect(200);
+        })
+        it('GET /', async () => {
+            const user = await createUser();
+            await query(
+                'INSERT INTO locations(user_id, street, place, psc) VALUES($1, $2, $3, $4)', 
+                [user.id, 'street', 'place', '123456']
+            )
+            await request(app)
+            .get('/api/location')
+            .set('Cookie', `token=${user.token}`)
+            .expect(200)
+        })
+    })
 })
