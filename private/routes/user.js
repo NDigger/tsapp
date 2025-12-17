@@ -56,26 +56,7 @@ router.put('/password', async (req, res) => {
   }
 })
 
-router.get('/:id', async (req, res) => {
-  try {
-    const currentUser = await User.getByToken(req.cookies.token);
-    if (currentUser.role !== User.Role.MODERATOR) return res.sendStatus(401);
-    const findUser = await User.getById(req.params.id);
-    if (findUser.id === currentUser.id) res.sendStatus(401);
-    const { id, first_name, last_name, email, role } = findUser;
-    res.json({
-      firstName: first_name,
-      lastName: last_name,
-      email: email,
-      role: role,
-      id: id,
-    });
-  } catch(e) {
-    console.error(e)
-    res.sendStatus(500)
-  }
-})
-
+// Temporary solution
 router.delete('/', async(req, res) => {
   try {
     const user = await User.fromToken(req.cookies.token);
@@ -101,8 +82,28 @@ router.post('/logout', async (req, res) => {
 // MODERATORS ONLY
 const isModerator = async () => {
   const expectedModerator = await User.fromToken(req.cookies.token);
-  return expectedModerator.role === UserRole.MODERATOR;
+  return expectedModerator.role === User.Role.MODERATOR;
 }
+
+router.get('/:id', async (req, res) => {
+  try {
+    const currentUser = await User.getByToken(req.cookies.token);
+    if (currentUser.role !== User.Role.MODERATOR) return res.sendStatus(401);
+    const findUser = await User.getById(req.params.id);
+    if (findUser.id === currentUser.id) res.sendStatus(401);
+    const { id, first_name, last_name, email, role } = findUser;
+    res.json({
+      firstName: first_name,
+      lastName: last_name,
+      email: email,
+      role: role,
+      id: id,
+    });
+  } catch(e) {
+    console.error(e)
+    res.sendStatus(500)
+  }
+})
 
 router.put('/:id', async (req, res) => {
   try {
