@@ -88,5 +88,17 @@ describe('app', () => {
             .set('Cookie', `token=${user.token}`)
             .expect(200)
         })
+        it('PUT /:id', async () => {
+            const user = await createUser();
+            const mod = await createUser(User.Role.MODERATOR);
+            await request(app)
+            .put(`/api/user/${user.id}`)
+            .send({
+                role: User.Role.PURCHASER,
+            })
+            .set('Content-Type', 'application/json')
+            .set('Cookie', `token=${mod.token}`)
+            .expect(200)
+        })
     })
 })

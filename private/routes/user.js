@@ -110,7 +110,7 @@ router.put('/:id', async (req, res) => {
   try {
     const isMod = await isModerator(req.cookies.token);
     if (!isMod) return res.sendStatus(401);
-    const user = User.fromId(req.params.id);
+    const user = await User.fromId(req.params.id);
     await user.setRole(req.body.role);
     res.sendStatus(200);
   } catch(e) {
