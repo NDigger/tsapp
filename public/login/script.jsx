@@ -17,14 +17,14 @@ const Login = () => {
         e.preventDefault()
         setStatus("")
         const { email, password } = e.target.elements;
-        const params = new URLSearchParams({
-            email: email.value,
-            password: password.value
-        });
-        const response = await fetch(`${backendHost}/api/user/by-login?${params.toString()}`, {
-            method: "GET",
+        const response = await fetch(`${backendHost}/api/user/login`, {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json"
+            },
+            body: {
+                email: email.value,
+                password: password.value
             },
             credentials: 'include',
         })

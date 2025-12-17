@@ -30,9 +30,9 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.get('/by-login', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
-    const user = await User.fromLogin(req.query);
+    const user = await User.fromLogin(req.body);
     if (user == undefined) return res.sendStatus(401).json({ error: "Invalid credentials" });
     await user.createSession(res);
     res.sendStatus(200);
