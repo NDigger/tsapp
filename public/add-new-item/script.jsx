@@ -19,25 +19,25 @@ const App = () => {
             XXXL: returnZeroIfNaN(parseInt(sizeCountXXXL.value))
         }
 
+        const imageFile = image.files[0];
         if (name.value === '') return setErrorText('Item must have a name');
-        if (!image.files[0]) return setErrorText('Item must have an image loaded');
+        if (!imageFile) return setErrorText('Item must have an image loaded');
+        if ((imageFile.size / 1024 / 1024).toFixed(2) > 8) return setErrorText('Max file size is 8MB')
         if (material.value === '') return setErrorText('Item material must be included');
         if (price.value === '') return setErrorText('Item must have a price');
         if (Object.values(sizes).reduce((sum, acc) => sum + acc, 0) === 0) 
             return setErrorText('Item count must be included');
 
         const formData = new FormData();
-        formData.append('image', image.files[0]);
+        formData.append('image', imageFile);
         formData.append('name', name.value);
         formData.append('material', material.value);
         formData.append('price', Math.max(0, parseFloat(price.value)));
         formData.append('sizes', JSON.stringify(sizes));
-        if ((image.files[0].size / 1024 / 1024).toFixed(2) > 8) {
-            setErrorText('Max file size is 8MB')
-            return
-        }
+
+            
         const img = new Image();
-        img.src = URL.createObjectURL(image.files[0]);
+        img.src = URL.createObjectURL(imageFile);
         img.onload = () => {
             const [w, h] = [img.naturalWidth, img.naturalHeight];
             const minResolution = { w: 128, h:128 };

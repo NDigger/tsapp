@@ -13,11 +13,11 @@ const cookieParser = require('cookie-parser');
 // 404 — не найдено.
 // 500 — ошибка на сервере.
 
-// app.use(cors({
-//   origin: 'http://localhost:5173',
-//   optionsSuccessStatus: 200,
-//   credentials: true
-// }));
+app.use(cors({
+  origin: 'http://localhost:5173',
+  optionsSuccessStatus: 200,
+  credentials: true
+}));
 app.use(cookieParser(process.env.SECRET));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

@@ -3,14 +3,15 @@ const app = require('./app');
 const { query } = require('./dbmodel');
 const request = require('supertest');
 
+const fs = require('fs');
 const User = require('./models/user');
 
-const rnd = () => crypto.randomBytes(12).toString('hex')
+const randomBytes = length => crypto.randomBytes(length).toString('hex')
 const createUser = async (role = User.Role.PURCHASER) => {
-    const firstName = rnd();
-    const lastName = rnd();
-    const email = `${rnd()}@${rnd()}`;
-    const password = rnd();
+    const firstName = randomBytes(6);
+    const lastName = randomBytes(6);
+    const email = `${randomBytes(9)}@${randomBytes(6)}`;
+    const password = randomBytes(12);
     const res = await query(
         `INSERT INTO users(first_name, last_name, email, password, role) 
         VALUES($1, $2, $3, $4, $5) 
@@ -131,6 +132,30 @@ describe('app', () => {
             )
             await request(app)
             .get('/api/location')
+            .set('Cookie', `token=${user.token}`)
+            .expect(200)
+        })
+    })
+    describe('items', () => {
+        it('POST /', async () => {
+            const user = await createUser(User.Role.SELLER);
+            const buffer = await new Promise((resolve, reject) => {
+                fs.readFile('./testImage.jpg', (err, data) => {
+                    err ? reject(err) : resolve(data)
+                })
+            })
+            const image = new File([buffer], 'image.jpg', { 
+                type: 'image/jpeg',
+                originalname: 'image.txt',
+                fieldname: 'image.txt'
+             })
+            await request(app)
+            .post('/api/items')
+            .field('name', 'T-Shirt')
+            .field('material', 'example')
+            .field('price', '15')
+            .field('sizes', JSON.stringify({ XL: '1', L: '2', S: '4' }))
+            .attach('image', './testImage.jpg')
             .set('Cookie', `token=${user.token}`)
             .expect(200)
         })
