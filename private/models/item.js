@@ -49,7 +49,7 @@ class Item {
                 XXXL: req.query.sizesXXXL === 'true',
             },
             price: {
-                min: Number(req.query.priceMin),
+                min: Number(req.query.priceMin) || 0,
                 max: Number(req.query.priceMax) || 999999999,
             }
         }

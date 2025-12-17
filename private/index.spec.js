@@ -3,7 +3,6 @@ const app = require('./app');
 const { query } = require('./dbmodel');
 const request = require('supertest');
 
-const fs = require('fs');
 const User = require('./models/user');
 
 const randomBytes = length => crypto.randomBytes(length).toString('hex')
@@ -25,6 +24,31 @@ const createUser = async (role = User.Role.PURCHASER) => {
         ...user,
         token
     };
+}
+const createItem = async () => {
+    const user = await createUser(User.Role.SELLER);
+
+    let item = await query(
+        'INSERT INTO items(seller_id, name, image_path, material, price) VALUES($1, $2, $3, $4, $5) RETURNING *',
+        [user.id, 'exampleItem', '', 'exampleMaterial', 15]
+    );
+    item = item.rows[0];
+    const id = item.id;
+
+    const sizedItems = [];
+
+    const setSizedItem = async(itemId, size) => {
+        const item = await query(
+            'INSERT INTO item_sizes(item_id, name, quantity) VALUES($1, $2, $3) ON CONFLICT (item_id, name) DO UPDATE SET quantity=EXCLUDED.quantity RETURNING *',
+            [id, size.name, size.quantity]
+        );
+        // return item.rows[0];
+    }
+    setSizedItem(id, {name: 'XS', quantity: 1})
+    setSizedItem(id, {name: 'XL', quantity: 2})
+    setSizedItem(id, {name: 'S', quantity: 3})
+    setSizedItem(id, {name: 'L', quantity: 4})
+    return item;
 }
 
 describe('app', () => {
@@ -139,16 +163,6 @@ describe('app', () => {
     describe('items', () => {
         it('POST /', async () => {
             const user = await createUser(User.Role.SELLER);
-            const buffer = await new Promise((resolve, reject) => {
-                fs.readFile('./testImage.jpg', (err, data) => {
-                    err ? reject(err) : resolve(data)
-                })
-            })
-            const image = new File([buffer], 'image.jpg', { 
-                type: 'image/jpeg',
-                originalname: 'image.txt',
-                fieldname: 'image.txt'
-             })
             await request(app)
             .post('/api/items')
             .field('name', 'T-Shirt')
@@ -158,6 +172,29 @@ describe('app', () => {
             .attach('image', './testImage.jpg')
             .set('Cookie', `token=${user.token}`)
             .expect(200)
+        })
+        it('GET /', async () => {
+            await createItem();
+            const params = new URLSearchParams({
+                sizeXS: 'true',
+                sizeS: 'true',
+                sizeL: 'true',
+                sizeXL: 'true',
+                sizeXXL: 'true',
+                sizeXXXL: 'true',
+                priceMin: 0,
+                priceMax: 9999999,
+                sort: ''
+            })
+            await request(app)
+            .get(`/api/items?${params.toString()}`)
+            .expect(200)
+        })
+        it('GET /:id', async () => {
+            const item = await createItem();
+            await request(app)
+            .get(`/api/items/${item.id}`)
+            .expect(200);
         })
     })
 })
