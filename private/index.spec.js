@@ -25,12 +25,15 @@ const createUser = async (role = User.Role.PURCHASER) => {
         token
     };
 }
-const createItem = async () => {
-    const user = await createUser(User.Role.SELLER);
+const createItem = async (userId = undefined) => {
+    if (userId === undefined) {
+        user = await createUser(User.Role.SELLER);
+        userId = user.id;
+    }
 
     let item = await query(
         'INSERT INTO items(seller_id, name, image_path, material, price) VALUES($1, $2, $3, $4, $5) RETURNING *',
-        [user.id, 'exampleItem', '', 'exampleMaterial', 15]
+        [userId, 'exampleItem', '', 'exampleMaterial', 15]
     );
     item = item.rows[0];
     const id = item.id;
@@ -194,6 +197,32 @@ describe('app', () => {
             const item = await createItem();
             await request(app)
             .get(`/api/items/${item.id}`)
+            .expect(200);
+        })
+    })
+    describe('seller', () => {
+        it('GET /items', async () => {
+            const user = await createUser(User.Role.SELLER);
+            await createItem(user.id);
+            await request(app)
+            .get('/api/seller/items')
+            .set('Cookie', `token=${user.token}`)
+            .expect(200);
+        })
+        it('GET /item/:itemId', async () => {
+            const user = await createUser(User.Role.SELLER);
+            const item = await createItem(user.id);
+            await request(app)
+            .get(`/api/seller/item/${item.id}`)
+            .set('Cookie', `token=${user.token}`)
+            .expect(200);
+        })
+        it('DELETE /item/:itemId', async () => {
+            const user = await createUser(User.Role.SELLER);
+            const item = await createItem(user.id);
+            await request(app)
+            .delete(`/api/seller/item/${item.id}`)
+            .set('Cookie', `token=${user.token}`)
             .expect(200);
         })
     })
