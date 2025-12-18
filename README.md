@@ -5,3 +5,8 @@
 3. Open your terminal in root folder.
 4. Type command "docker compose up --build" and wait when servers are loaded
 5. Visit http://localhost:5173/index.html
+
+# How to run tests?
+
+1. Type command "docker compose up --build" and wait when servers are loaded
+2. Type command "docker exec t-shirtsapp-backend-1 npm run test" in new terminal and look at test results

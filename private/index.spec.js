@@ -1,9 +1,19 @@
+require('dotenv').config({quiet: true});
 const crypto = require('crypto');
 const app = require('./app');
-const { query } = require('./dbmodel');
 const request = require('supertest');
+const { query } = require('./dbmodel');
 
 const User = require('./models/user');
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  host: 'db_test',
+  port: '5432',
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: 'tsapp_test',
+});
 
 const randomBytes = length => crypto.randomBytes(length).toString('hex')
 const createUser = async (role = User.Role.PURCHASER) => {
