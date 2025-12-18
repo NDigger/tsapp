@@ -20,9 +20,11 @@ const createUser = async (role = User.Role.PURCHASER) => {
     const user = res.rows[0];
     const token = crypto.randomBytes(32).toString('hex');
     await query('INSERT INTO sessions(user_id, token) VALUES($1,$2)', [user.id, token])
+    const controller = await User.fromToken(token);
     return {
         ...user,
-        token
+        token,
+        controller,
     };
 }
 const createItem = async (userId = undefined) => {
@@ -45,12 +47,15 @@ const createItem = async (userId = undefined) => {
             'INSERT INTO item_sizes(item_id, name, quantity) VALUES($1, $2, $3) ON CONFLICT (item_id, name) DO UPDATE SET quantity=EXCLUDED.quantity RETURNING *',
             [id, size.name, size.quantity]
         );
-        // return item.rows[0];
+        sizedItems.push(item.rows[0]);
     }
-    setSizedItem(id, {name: 'XS', quantity: 1})
-    setSizedItem(id, {name: 'XL', quantity: 2})
-    setSizedItem(id, {name: 'S', quantity: 3})
-    setSizedItem(id, {name: 'L', quantity: 4})
+    await setSizedItem(id, {name: 'XS', quantity: 7})
+    await setSizedItem(id, {name: 'S', quantity: 6})
+    await setSizedItem(id, {name: 'L', quantity: 5})
+    await setSizedItem(id, {name: 'XL', quantity: 4})
+    await setSizedItem(id, {name: 'XXL', quantity: 3})
+    await setSizedItem(id, {name: 'XXXL', quantity: 2})
+    item.sizes = sizedItems;
     return item;
 }
 
@@ -222,6 +227,41 @@ describe('app', () => {
             const item = await createItem(user.id);
             await request(app)
             .delete(`/api/seller/item/${item.id}`)
+            .set('Cookie', `token=${user.token}`)
+            .expect(200);
+        })
+    })
+    describe('cart', () => {
+        it('POST /', async () => {
+            const user = await createUser();
+            const item = await createItem();
+            await request(app)
+            .post('/api/cart')
+            .send({
+                sizedItemId: item.sizes.find(size => size.name === 'XS').id,
+                quantity: '1',
+            })
+            .set('Content-Type', 'application/json')
+            .set('Cookie', `token=${user.token}`)
+            .expect(200);
+        })
+        it('GET /', async () => {
+            const user = await createUser();
+            const item = await createItem();
+            const sizedItemId = item.sizes.find(size => size.name === 'XS').id;
+            user.controller.addCartItem(sizedItemId, 1);
+            await request(app)
+            .get('/api/cart')
+            .set('Cookie', `token=${user.token}`)
+            .expect(200);
+        })
+        it('DELETE /:id', async () => {
+            const user = await createUser();
+            const item = await createItem();
+            const sizedItemId = item.sizes.find(size => size.name === 'XS').id;
+            user.controller.addCartItem(sizedItemId, 1);
+            await request(app)
+            .delete(`/api/cart/${sizedItemId}`)
             .set('Cookie', `token=${user.token}`)
             .expect(200);
         })

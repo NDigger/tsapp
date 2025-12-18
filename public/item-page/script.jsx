@@ -38,7 +38,7 @@ const App = () => {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sizedItem: selectedSizedItem, quantity: Math.min(Number(quantity.value), selectedSizedItem.quantity) })
+                body: JSON.stringify({ sizedItemId: selectedSizedItem.id, quantity: Math.min(Number(quantity.value), selectedSizedItem.quantity) })
             })
             .then(res => {
                 if (res.ok) {

@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 
 const User = require('../models/user');
-const request = require('supertest');
 
 router.post('/', async (req, res) => {
     try {
         const user = await User.fromToken(req.cookies.token);
-        await user.addCartItem(req.body.sizedItem.id, req.body.quantity);
+        await user.addCartItem(req.body.sizedItemId, req.body.quantity);
         res.sendStatus(200);
     } catch(e) {
         res.sendStatus(500);
@@ -28,7 +27,7 @@ router.get('/', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        const user = User.fromToken(req.cookies.token);
+        const user = await User.fromToken(req.cookies.token);
         const sizedItemId = req.params.id;
         await user.removeCartItem(sizedItemId);
         const items = await user.getCartItems();
