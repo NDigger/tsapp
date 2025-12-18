@@ -44,12 +44,6 @@ const Cart = () => {
         console.log(sendItems);
         fetch(`${backendHost}/api/order`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                items: sendItems,
-            }),
             credentials: 'include'
         })
         

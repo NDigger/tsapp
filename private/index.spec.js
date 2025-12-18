@@ -35,7 +35,7 @@ const createItem = async (userId = undefined) => {
 
     let item = await query(
         'INSERT INTO items(seller_id, name, image_path, material, price) VALUES($1, $2, $3, $4, $5) RETURNING *',
-        [userId, 'exampleItem', '', 'exampleMaterial', 15]
+        [userId, 'exampleItem', 'testImage.jpg', 'exampleMaterial', 15]
     );
     item = item.rows[0];
     const id = item.id;
@@ -141,6 +141,40 @@ describe('app', () => {
             .set('Cookie', `token=${mod.token}`)
             .expect(200)
         })
+
+        // LETS CHECK FOR ERRORS
+        it('ERROR POST /', async () => {
+            await request(app)
+            .post('/api/user')
+            .send({
+                firstName: 'example',
+                lastName: 'example',
+                email: 'examplemail', // Email must contain @ symbol
+                password: '1234'
+            })
+            .set('Content-Type', 'application/json')
+            .expect(500);
+        })
+        it('ERROR PUT /:id', async () => {
+            const user = await createUser();
+            const notMod = await createUser(); // Not mod is trying to change another user role
+            await request(app)
+            .put(`/api/user/${user.id}`)
+            .send({
+                role: User.Role.PURCHASER,
+            })
+            .set('Content-Type', 'application/json')
+            .set('Cookie', `token=${notMod.token}`)
+            .expect(401)
+        })
+        it('ERROR DELETE /', async () => {
+            // const user = await createUser();
+            await request(app)
+            .delete(`/api/user`)
+            // Cookie is not set, app can't delete user
+            // .set('Cookie', `token=${user.token}`)
+            .expect(500)
+        })
     })
     describe('location', () => {
         it('POST /', async () => {
@@ -166,7 +200,7 @@ describe('app', () => {
             .get('/api/location')
             .set('Cookie', `token=${user.token}`)
             .expect(200)
-        })
+        })        
     })
     describe('items', () => {
         it('POST /', async () => {
@@ -264,6 +298,29 @@ describe('app', () => {
             .delete(`/api/cart/${sizedItemId}`)
             .set('Cookie', `token=${user.token}`)
             .expect(200);
+        })
+    })
+    describe('order', () => {
+        it('POST /', async () => {
+            const user = await createUser();
+            const item = await createItem();
+            const sizedItemId = item.sizes.find(size => size.name === 'XS').id;
+            await user.controller.addCartItem(sizedItemId, 1);
+            await request(app)
+            .post('/api/order')
+            .set('Cookie', `token=${user.token}`)
+            .expect(200)
+        })
+        it('GET /', async () => {
+            const user = await createUser();
+            const item = await createItem();
+            const sizedItemId = item.sizes.find(size => size.name === 'XS').id;
+            await user.controller.addCartItem(sizedItemId, 1);
+            await user.controller.pushOrder()
+            await request(app)
+            .get('/api/order')
+            .set('Cookie', `token=${user.token}`)
+            .expect(200)
         })
     })
 })

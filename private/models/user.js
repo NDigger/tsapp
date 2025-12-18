@@ -146,7 +146,8 @@ class User {
     }
 
     // Orders 
-    async pushOrder(items) {
+    async pushOrder() {
+        const items = await this.getCartItems();
         let order = await query(
             'INSERT INTO orders(user_id) VALUES($1) RETURNING *',
             [this.id]

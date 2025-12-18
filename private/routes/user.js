@@ -4,6 +4,7 @@ const User = require('../models/user');
 
 router.post('/', async (req, res) => {
   try {
+    if (!req.body.email.includes('@')) res.status(500).send('Email must include @ symbol');
     const user = await User.create(req.body);
     await user.createSession(res);
     res.sendStatus(200);

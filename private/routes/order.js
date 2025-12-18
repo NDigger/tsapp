@@ -5,7 +5,7 @@ const User = require('../models/user');
 router.post('/', async (req, res) => {
     try {
         const user = await User.fromToken(req.cookies.token);
-        const order = await user.pushOrder(req.body.items);
+        const order = await user.pushOrder();
         res.json(order);
     } catch(e) {
         console.error(e);
